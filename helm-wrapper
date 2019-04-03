@@ -1,0 +1,31 @@
+#!/bin/bash
+# This script will ensure tiller is running before running helm
+export TILLER_NAMESPACE=tiller HELM_HOST='localhost:44134'
+
+main() {
+  # start tiller if it's not running
+  if ! pgrep tiller >/dev/null; then
+    tiller &
+  fi
+
+  temp_file="$(mktemp)"
+  helm $@ 2> >(tee "$temp_file")
+  exit_code=$?
+
+  # after a while the tiller session expires and it gets unauthorized: this
+  # will try to restart tiller and run helm again, but just once (to avoid an
+  # endless loop in case tiller doesn't fix)
+  if [[ $exit_code != 0 ]] && \
+     grep 'Error: Unauthorized' "$temp_file" 2>&1 >/dev/null && \
+     [[ "$restarted" != 'true' ]]
+  then
+    killall tiller
+    echo 'Tiller is unauthorized, restarting...'
+    restarted='true'
+    main $@
+  fi
+}
+
+main $@
+rm "$temp_file"
+exit "$exit_code"
