@@ -2,8 +2,8 @@ FROM alpine
 
 RUN apk add --no-cache git curl py-pip bash ca-certificates && \
     pip install --no-cache-dir awscli && \
-    curl -L 'https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz' > helm.tar.gz && \
-    echo 'c1967c1dfcd6c921694b80ededdb9bd1beb27cb076864e58957b1568bc98925a  helm.tar.gz' | sha256sum -c && \
+    curl -L 'https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz' > helm.tar.gz && \
+    echo '804f745e6884435ef1343f4de8940f9db64f935cd9a55ad3d9153d064b7f5896  helm.tar.gz' | sha256sum -c && \
     tar xf helm.tar.gz && \
     mv linux-amd64/helm linux-amd64/tiller /bin/ && \
     rm -r helm.tar.gz linux-amd64/ && \
